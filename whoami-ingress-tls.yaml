@@ -1,0 +1,26 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: whoami-tls-ingress
+  annotations:
+    spec.ingressClassName: traefik
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    traefik.ingress.kubernetes.io/router.middlewares: default-redirect-https@kubernetescrd
+    # default is Namespace, redirect-https is Middleware name
+spec:
+  rules:
+    - host: whoami.$DOMAIN      # Domain name
+      http:
+        paths:
+          - path: /
+            pathType: Prefix      # Prefix | ImplementationSpecific
+            backend:
+              service:
+                name: whoami-svc  # Service name
+                port:
+                  number: 8888    # Service port, not pod port
+  tls:
+    - secretName: whoami-tls      # Certificate name
+      hosts:
+        - whoami.$DOMAIN        # Domain name
+---
